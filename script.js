@@ -114,7 +114,7 @@ if (username) {
     kullaniciNameElement.innerHTML = username;
   }
 }
- 
+let isUpdate = false;
 document.addEventListener("DOMContentLoaded", function () {
   if (document.getElementById("logoutButton")) {
     const logoutButton = document.getElementById("logoutButton");
@@ -128,8 +128,8 @@ document.addEventListener("DOMContentLoaded", function () {
           }, 1000);
         })
         .catch((error) => {
-          console.log("Çıkış hatası", error);
-          alert("Çıkış yaparken bir hata");
+          console.log("Çıkış hatası:", error);
+          alert("Çıkış yaparken bir hata oluştu.");
         });
     });
   }
@@ -159,7 +159,7 @@ document.addEventListener("DOMContentLoaded", function () {
             ]
           },
           placeholder: 'Note',
-          theme: 'snow' 
+          theme: 'snow'
         });
       }
       if (!window.noteTitleInput) {
@@ -170,7 +170,8 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       if (isUpdate && !oParams.isUpdate) {
         return;
-      }else if (oParams.isUpdate) {
+      }
+      else if (oParams.isUpdate) {
 
         window.noteTitleInput.value = oParams.title;
 
@@ -190,7 +191,6 @@ document.addEventListener("DOMContentLoaded", function () {
  
     $("#exampleModalCenter").on("hidden.bs.modal", function (e) {
       clearNoteForm();
-      isUpdate = false; 
     });
   }
 
@@ -216,7 +216,7 @@ document.addEventListener("DOMContentLoaded", function () {
               content: note.content,
               noteId: noteId,
             };
-            onAddOrEditNote(oParams ,isUpdate);
+            onAddOrEditNote(oParams);
             $("#exampleModalCenter").modal("show");
           })
           .catch((error) => {
@@ -244,7 +244,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const currentUser = auth.currentUser;
       //updatten sonra add e girmemesi için
       if (isUpdate) {
-        isUpdate = true;  
+        isUpdate = false;  
         return;
       }
       const notesRef = ref(database, "notes/" + currentUser.uid);
@@ -454,6 +454,7 @@ document.addEventListener("DOMContentLoaded", function () {
         alert(error.message);
       }
     }
+    
 
     document
       .getElementById("addButton")
@@ -462,11 +463,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Yeni not ekle btn tıklandığında
     function handleAddButtonClick() {
-      isUpdate = false; 
       const newNoteParams = {
         isUpdate: false,
       };
-      onAddOrEditNote(newNoteParams, isUpdate);
+      onAddOrEditNote(newNoteParams);
       $("#exampleModalCenter").modal("show");
     }
 
@@ -490,7 +490,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 content: note.content,
                 noteId: noteId,
               };
-              onAddOrEditNote(oParams,isUpdate);
+              onAddOrEditNote(oParams);
               $("#exampleModalCenter").modal("show");
  
               const saveButton = document.getElementById("submit-button");
