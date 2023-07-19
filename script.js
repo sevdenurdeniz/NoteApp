@@ -136,7 +136,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function clearNoteForm() {
     document.getElementById("category").value =
       "<option selected disabled>Category</option>";
-    document.getElementById("title").value = "asd";
+    document.getElementById("title").value = "";
     quillEditor.setText(""); // editörün içini boşalt
   }
 
@@ -151,15 +151,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (oParams && Object.keys(oParams).length) {
       if (!window.quillEditor) {
         window.quillEditor = new Quill("#editor", {
-          modules: {
-            toolbar: [
-              [{ header: [1, 2, false] }],
-              ['bold', 'italic', 'underline'],
-              ['image', 'code-block']
-            ]
-          },
-          placeholder: 'Note',
-          theme: 'snow'
+          theme: "snow",
         });
       }
       if (!window.noteTitleInput) {
@@ -312,9 +304,14 @@ document.addEventListener("DOMContentLoaded", function () {
           alert(error.message);
         });
       e.preventDefault();
-      
-      //modalı temzile ++--
- 
+      //modalı temzile
+      function clearNoteForm() {
+        document.getElementById("category").value =
+          "<option selected>Category</option>";
+        document.getElementById("title").value = "";
+        document.getElementById("editor").innerHTML =
+          "<p>New Note...</p><br /><br />";
+      }
     });
   }
 
@@ -429,10 +426,10 @@ document.addEventListener("DOMContentLoaded", function () {
           alert(error.message);
         });
     }
- 
+
     async function updateNoteInDatabase(
       userId,
-      updatedCategory,
+      category,
       noteId,
       updatedTitle,
       updatedContent
@@ -440,7 +437,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const noteRef = ref(database, `notes/${userId}/${noteId}`);
       try {
         await update(noteRef, {
-          category: updatedCategory,
+          category: category,
           title: updatedTitle,
           content: updatedContent,
           date: new Date().toLocaleDateString(),
@@ -495,13 +492,12 @@ document.addEventListener("DOMContentLoaded", function () {
  
               const saveButton = document.getElementById("submit-button");
               saveButton.addEventListener("click", () => {
-                const updatedCategory = document.getElementById("category").value;
                 const updatedTitle = document.getElementById("title").value;
                 const updatedContent =
                   document.getElementById("editor").innerHTML;
                 updateNoteInDatabase(
                   currentUser.uid,
-                  updatedCategory,
+                  category,
                   noteId,
                   updatedTitle,
                   updatedContent
