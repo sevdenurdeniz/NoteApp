@@ -556,6 +556,7 @@ button:focus {
 
 .ql-editor {
 	height: auto !important;
+	min-height: 100px;
 	padding: 0 !important;
 }
 

@@ -115,6 +115,7 @@ if (username) {
   }
 }
 let isUpdate = false;
+
 document.addEventListener("DOMContentLoaded", function () {
   if (document.getElementById("logoutButton")) {
     const logoutButton = document.getElementById("logoutButton");
@@ -139,19 +140,23 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("title").value = "";
     quillEditor.setText(""); // editörün içini boşalt
   }
+ 
+  
+ 
 
-  document
-    .querySelectorAll(".fa-solid.fa-pen-to-square")
-    .forEach((updateButton) => {
-      updateButton.addEventListener("click", handleUpdateButtonClick);
-    });
-
-  let isUpdate = false;
   function onAddOrEditNote(oParams) {
     if (oParams && Object.keys(oParams).length) {
       if (!window.quillEditor) {
         window.quillEditor = new Quill("#editor", {
-          theme: "snow",
+          modules: {
+            toolbar: [
+              [{ header: [1, 2, false] }],
+              ['bold', 'italic', 'underline'],
+              ['image', 'code-block']
+            ]
+          },
+          placeholder: 'Note..',
+          theme: 'snow'
         });
       }
       if (!window.noteTitleInput) {
@@ -160,10 +165,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!window.noteDescriptionInput) {
         window.noteDescriptionInput = document.getElementById("editor");
       }
-      if (isUpdate && !oParams.isUpdate) {
-        return;
-      }
-      else if (oParams.isUpdate) {
+      if (oParams.isUpdate) {
 
         window.noteTitleInput.value = oParams.title;
 
@@ -175,6 +177,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (categoryInput) {
           categoryInput.value = oParams.category;
         }
+ 
       } else {
         window.noteTitleInput.value = "";
         window.quillEditor.setContents([]);
@@ -186,71 +189,32 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  document
-    .getElementById("notes-container")
-    .addEventListener("click", function (event) {
-      if (event.target.classList.contains("fa-pen-to-square")) {
-        const noteId = event.target.getAttribute("data-id");
-        const category = event.target.getAttribute("data-category");
-        const noteRef = ref(
-          database,
-          `notes/${auth.currentUser.uid}/${noteId}`
-        );
 
-        // Get the existing note data
-        get(noteRef)
-          .then((snapshot) => {
-            const note = snapshot.val();
-            const oParams = {
-              isUpdate: true,
-              category: category, //+
-              title: note.title,
-              content: note.content,
-              noteId: noteId,
-            };
-            onAddOrEditNote(oParams);
-            $("#exampleModalCenter").modal("show");
-          })
-          .catch((error) => {
-            console.log("Error:", error);
-            alert(error.message);
-          });
-      } else if (event.target.classList.contains("btn-add")) {
-        const oParams = {
-          isUpdate: false,
-        };
-        onAddOrEditNote(oParams);
-        $("#exampleModalCenter").modal("show");
-      }
-    });
+
 
   //not ekleme kısmı +-+-+-
-  if (document.getElementById("noteForm")) {
+  
+  if (document.getElementById("addButton")) {
     const form = document.getElementById("noteForm");
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       const category = document.getElementById("category").value;
       const title = document.getElementById("title").value;
       const content = document.getElementById("editor").innerHTML;
-
+ 
       const currentUser = auth.currentUser;
-      //updatten sonra add e girmemesi için
-      if (isUpdate) {
-        isUpdate = false;  
-        return;
-      }
       const notesRef = ref(database, "notes/" + currentUser.uid);
       const newNoteRef = push(notesRef);
       const noteId = newNoteRef.key;
-
-  
       const newNote = {
+        isUpdate:false,
         category: category, //
         title: title,
         content: content,
         date: new Date().toLocaleDateString(),
       };
-
+ //
+  if(isUpdate===false){
       set(newNoteRef, newNote)
         .then(() => {
           console.log("Not kaydedildi");
@@ -303,18 +267,18 @@ document.addEventListener("DOMContentLoaded", function () {
           console.log("Hata:", error);
           alert(error.message);
         });
-      e.preventDefault();
+       
+    }
       //modalı temzile
       function clearNoteForm() {
         document.getElementById("category").value =
-          "<option selected>Category</option>";
-        document.getElementById("title").value = "";
-        document.getElementById("editor").innerHTML =
-          "<p>New Note...</p><br /><br />";
+          "<option selected disabled>Category</option>";
+        document.getElementById("title").value = "asd";
+        quillEditor.setText(""); // editörün içini boşalt
       }
     });
   }
-
+ 
   // tablodaki notları ekrana getirme
   if (document.getElementById("notes-container")) {
     const notesContainer = document.getElementById("notes-container");
@@ -329,7 +293,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
 
-    async function fetchAndDisplayNotes(userId) {
+     function fetchAndDisplayNotes(userId) {
       const notesRef = ref(database, `notes/${userId}`);
 
       get(notesRef)
@@ -418,7 +382,15 @@ document.addEventListener("DOMContentLoaded", function () {
                     });
                 });
               });
-            //upadte içinde gelmeli buraya listeneri
+
+              document.querySelectorAll(".fa-solid.fa-pen-to-square.update-button").forEach((updateButton) => {
+                updateButton.addEventListener("click", (event) => {
+                  const noteId = event.target.getAttribute("data-id");
+                  const category = event.target.getAttribute("data-category");
+                  handleUpdateButtonClick(noteId, category);
+                });
+              });
+
           }
         })
         .catch((error) => {
@@ -427,95 +399,135 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    async function updateNoteInDatabase(
+    function updateNoteInDatabase(
       userId,
-      category,
+      updatedCategory,
       noteId,
       updatedTitle,
       updatedContent
     ) {
       const noteRef = ref(database, `notes/${userId}/${noteId}`);
-      try {
-        await update(noteRef, {
-          category: category,
-          title: updatedTitle,
-          content: updatedContent,
-          date: new Date().toLocaleDateString(),
+      if(isUpdate===true){
+      update(noteRef, {
+        category: updatedCategory,
+        title: updatedTitle,
+        content: updatedContent,
+        date: new Date().toLocaleDateString(),
+      })
+        .then(() => {
+          console.log("Note successfully updated");
+          console.log(isUpdate);
+          Swal.fire("Update Note", "Note updated successfully!", "success");
+           fetchAndDisplayNotes(userId);
+           isUpdate = false;
+        })
+        .catch((error) => {
+          console.log("Error:", error);
+          alert(error.message);
         });
-        console.log(isUpdate);
-        console.log("Note successfully updated");
-        Swal.fire("Update Note", "Note updated successfully!", "success");
-        fetchAndDisplayNotes(userId);
-      } catch (error) {
-        console.log("Error:", error);
-        alert(error.message);
       }
     }
-    
-
-    document
-      .getElementById("addButton")
-      .addEventListener("click", handleAddButtonClick);
 
 
-    // Yeni not ekle btn tıklandığında
-    function handleAddButtonClick() {
-      const newNoteParams = {
-        isUpdate: false,
-      };
-      onAddOrEditNote(newNoteParams);
-      $("#exampleModalCenter").modal("show");
+    if (document.getElementById("addButton")) {
+      document.getElementById("addButton").addEventListener("click", function (e) {
+        const newNoteParams = {
+          isUpdate: false,
+        };
+        onAddOrEditNote(newNoteParams);
+        $("#exampleModalCenter").modal("show");
+      });
     }
-
-    //   güncelleme btn tıklandığında
-    function handleUpdateButtonClick(event) {
-      if (auth.currentUser) {
-        isUpdate = true;
+  document
+    .getElementById("notes-container")
+    .addEventListener("click", function (event) {
+      if (event.target.classList.contains("fa-pen-to-square")) {
+        handleUpdateButtonClick(event);
         const noteId = event.target.getAttribute("data-id");
         const category = event.target.getAttribute("data-category");
-        const currentUser = auth.currentUser;
-
-        const noteRef = ref(database, `notes/${currentUser.uid}/${noteId}`);
+        const noteRef = ref(
+          database,
+          `notes/${auth.currentUser.uid}/${noteId}`
+        );
+ 
         get(noteRef)
           .then((snapshot) => {
             const note = snapshot.val();
-            if (note) {
-              const oParams = {
-                isUpdate: true,
-                category: category,
-                title: note.title,
-                content: note.content,
-                noteId: noteId,
-              };
-              onAddOrEditNote(oParams);
-              $("#exampleModalCenter").modal("show");
- 
-              const saveButton = document.getElementById("submit-button");
-              saveButton.addEventListener("click", () => {
-                const updatedTitle = document.getElementById("title").value;
-                const updatedContent =
-                  document.getElementById("editor").innerHTML;
-                updateNoteInDatabase(
-                  currentUser.uid,
-                  category,
-                  noteId,
-                  updatedTitle,
-                  updatedContent
-                );
-                $("#exampleModalCenter").modal("hide");
-              });
-            } else {
-              console.log("Note not found.");
-            }
+            const oParams = {
+              isUpdate: true,
+              category: note.category, //+
+              title: note.title,
+              content: note.content,
+              noteId: noteId,
+            };
+            onAddOrEditNote(oParams);
+            $("#exampleModalCenter").modal("show");
           })
           .catch((error) => {
             console.log("Error:", error);
             alert(error.message);
           });
-      } else {
-        alert("***.");
+      } else if (event.target.classList.contains("btn-add")) {
+        const oParams = {
+          isUpdate: false,
+        };
+        onAddOrEditNote(oParams);
+        $("#exampleModalCenter").modal("show");
+        isUpdate = false; ///
       }
+    });
+
+    
+  function handleUpdateButtonClick(event) {
+    event.preventDefault();
+    isUpdate = true;
+    if (auth.currentUser) {
+      const noteId = event.target.getAttribute("data-id");
+      const category = event.target.getAttribute("data-category");
+      const currentUser = auth.currentUser;
+  
+      const noteRef = ref(database, `notes/${currentUser.uid}/${noteId}`);
+      get(noteRef)
+        .then((snapshot) => {
+          const note = snapshot.val();
+          if (note) {
+            const oParams = {
+              isUpdate: true,
+              category: note.category,
+              title: note.title,
+              content: note.content,
+              noteId: noteId,
+            };
+            onAddOrEditNote(oParams);
+            $("#exampleModalCenter").modal("show");
+  
+            const saveButton = document.getElementById("submit-button");
+            saveButton.addEventListener("click", () => {
+              const updatedTitle = document.getElementById("title").value;
+              const updatedContent = document.getElementById("editor").innerHTML;
+              const updatedCategory = document.getElementById("category").value;
+              updateNoteInDatabase(
+                currentUser.uid,
+                updatedCategory,
+                noteId,
+                updatedTitle,
+                updatedContent
+              );
+              $("#exampleModalCenter").modal("hide");
+            });
+          } else {
+            console.log("Note not found.");
+          }
+        })
+        .catch((error) => {
+          console.log("Error:", error);
+          alert(error.message);
+        });
+    } else {
+      alert("User is not logged in.");
     }
+  }
+ 
 
     function handleViewButtonClick(event) {
       const noteId = event.target.getAttribute("data-id");
@@ -532,13 +544,11 @@ document.addEventListener("DOMContentLoaded", function () {
       // deleteNoteFromDatabase işlemini burada çağırın
       deleteNoteFromDatabase(currentUser.uid, category, noteId)
         .then(() => {
-          // Not başarıyla silindikten sonra kullanıcı arayüzünden de kaldırabilirsiniz.
           const deletedNoteElement = event.target.closest(
             ".col-12.col-lg-4.my-3"
           );
           deletedNoteElement.remove();
 
-          // Eğer notlarContainer'ın altında hiç not kalmadıysa, uygun bir mesaj gösterin
           const notesContainer = document.getElementById("notes-container");
           if (notesContainer.children.length === 0) {
             notesContainer.innerHTML = "";
@@ -550,13 +560,10 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // "notes-container" elementine olay dinleyicilerini ekle
     document
       .getElementById("notes-container")
       .addEventListener("click", (event) => {
-        if (event.target.classList.contains("fa-pen-to-square")) {
-          handleUpdateButtonClick(event);
-        } else if (event.target.classList.contains("fa-trash")) {
+         if (event.target.classList.contains("fa-trash")) {
           handleDeleteButtonClick(event);
         } else if (event.target.classList.contains("fa-eye")) {
           handleViewButtonClick(event);
@@ -694,9 +701,9 @@ document.addEventListener("DOMContentLoaded", function () {
             .textContent.toLowerCase();
 
           if (selectedCategory === "all" || category === selectedCategory) {
-            notesContainer.style.display = "block"; // Eşleşirse göster
+            notesContainer.style.display = "block";  
           } else {
-            notesContainer.style.display = "none"; // Eşleşmezse gizle
+            notesContainer.style.display = "none";  
           }
         });
         // butona active at
