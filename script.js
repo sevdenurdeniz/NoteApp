@@ -390,13 +390,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
               });
 
-            document.querySelectorAll(".fa-solid.fa-pen-to-square.update-button").forEach((updateButton) => {
+            /*  document.querySelectorAll(".fa-solid.fa-pen-to-square.update-button").forEach((updateButton) => {
                 updateButton.addEventListener("click", (event) => {
                   const noteId = event.target.getAttribute("data-id");
                   const category = event.target.getAttribute("data-category");
                   handleUpdateButtonClick(noteId, category);
                 });
-              }); 
+              });*/
 
           }
         })
@@ -405,7 +405,7 @@ document.addEventListener("DOMContentLoaded", function () {
           alert(error.message);
         });
     }
-///burada tekrarlanıyor her şey
+
     function updateNoteInDatabase(
       userId,
       updatedCategory,
@@ -414,7 +414,7 @@ document.addEventListener("DOMContentLoaded", function () {
       updatedContent
     ) {
       const noteRef = ref(database, `notes/${userId}/${noteId}`);
-     
+      if(isUpdate===true){
       update(noteRef, {
         category: updatedCategory,
         title: updatedTitle,
@@ -432,7 +432,7 @@ document.addEventListener("DOMContentLoaded", function () {
           console.log("Error:", error);
           alert(error.message);
         });
-      
+      }
     }
 
 
@@ -449,6 +449,7 @@ document.addEventListener("DOMContentLoaded", function () {
     .getElementById("notes-container")
     .addEventListener("click", function (event) {
       if (event.target.classList.contains("fa-pen-to-square")) {
+        handleUpdateButtonClick(event);
         const noteId = event.target.getAttribute("data-id");
         const category = event.target.getAttribute("data-category");
         const noteRef = ref(
@@ -481,14 +482,12 @@ document.addEventListener("DOMContentLoaded", function () {
         $("#exampleModalCenter").modal("show");
         isUpdate = false; ///
       }
-
-     // handleUpdateButtonClick(event);
     });
 
-    //burası ilk tıklananı da alıyor
+    
   function handleUpdateButtonClick(event) {
-
-    //isUpdate = true;
+    event.preventDefault();
+    isUpdate = true;
     if (auth.currentUser) {
       const noteId = event.target.getAttribute("data-id");
       const category = event.target.getAttribute("data-category");
@@ -524,7 +523,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 updatedTitle,
                 updatedContent
               );
-               
+              saveButton.removeEventListener("click", updateNoteInDatabase);
+saveButton.addEventListener("click", updateNoteInDatabase);
               $("#exampleModalCenter").modal("hide");
             });
           } else {
@@ -571,25 +571,23 @@ document.addEventListener("DOMContentLoaded", function () {
           alert(error.message);
         });
     }
- 
-    document.getElementById("notes-container").addEventListener("click", function (event) {
-      if (event.target.classList.contains("fa-pen-to-square")) {
-        const noteId = event.target.getAttribute("data-id");
-        const category = event.target.getAttribute("data-category");
-        handleUpdateButtonClick(event, noteId, category);
-      } else if (event.target.classList.contains("fa-eye")) {
-        // handleViewButtonClick(event);
-      } else if (event.target.classList.contains("fa-trash")) {
-        // handleDeleteButtonClick(event);
-      }
-    });
+
+    document
+      .getElementById("notes-container")
+      .addEventListener("click", (event) => {
+         if (event.target.classList.contains("fa-trash")) {
+          handleDeleteButtonClick(event);
+        } else if (event.target.classList.contains("fa-eye")) {
+          handleViewButtonClick(event);
+        }
+      });
 
     //view
-    /*document.querySelectorAll(".fa-solid.fa-eye").forEach((updateButton) => {
+    document.querySelectorAll(".fa-solid.fa-eye").forEach((updateButton) => {
       updateButton.addEventListener("click", (event) => {
         handleViewButtonClick(event);
       });
-    });*/
+    });
 
     // silme düğmeleri
     document.querySelectorAll(".fa-solid.fa-trash").forEach((deleteButton) => {
