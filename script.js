@@ -135,9 +135,18 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
   function clearNoteForm() {
-    document.getElementById("category").selectedIndex = 0;
-    document.getElementById("title").value = "";
-    quillEditor.setText(""); 
+    const categoryElement = document.getElementById("category");
+    if (categoryElement) {
+      categoryElement.selectedIndex = 0;
+    }
+    const titleElement = document.getElementById("title");
+    if (titleElement) {
+      titleElement.value = "";
+    }
+    const quillEditor = window.quillEditor;
+    if (quillEditor) {
+      quillEditor.setText("");
+    }
   }
 
   function onAddOrEditNote(oParams) {
@@ -256,13 +265,10 @@ document.addEventListener("DOMContentLoaded", function () {
                  // deleteNoteFromDatabase işlevini burada çağırın
                  deleteNoteFromDatabase(currentUser.uid, category, noteId)
                    .then(() => {
-                     // Not başarıyla silindikten sonra kullanıcı arayüzünden de kaldırabilirsiniz.
                      const deletedNoteElement = event.target.closest(
                        ".col-12.col-lg-4.my-3"
                      );
                      deletedNoteElement.remove();
-
-                     // Eğer notlarContainer'ın altında hiç not kalmadıysa, uygun bir mesaj gösterin
                      const notesContainer =
                        document.getElementById("notes-container");
                      if (notesContainer.children.length === 0) {
@@ -340,6 +346,7 @@ document.addEventListener("DOMContentLoaded", function () {
             //modalı temzile
             clearNoteForm();
 
+
             // Yeni notu listeye ekleme
             const notesContainer = document.getElementById("notes-container");
             const noteHTML = `
@@ -377,6 +384,7 @@ document.addEventListener("DOMContentLoaded", function () {
             `;
             notesContainer.insertAdjacentHTML("beforeend", noteHTML);
             isUpdate = false; ///
+            addViewAndDeleteListeners();//
           })
           .catch((error) => {
             console.log("Hata:", error);
@@ -452,10 +460,9 @@ document.addEventListener("DOMContentLoaded", function () {
             content: note.content,
           };
           onAddOrEditNote(updateNoteParams);
-          // Eski not id'sini data-id attribute'unda saklamak için form elementine set edin
+
           const form = document.getElementById("noteForm");
           form.setAttribute("data-id", noteId);
-          // Modalı açın
           $("#exampleModalCenter").modal("show");
           
         })
@@ -466,21 +473,23 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  function handleViewButtonClick(event) {
+    const noteId = event.target.getAttribute("data-id");
+    const category = event.target.getAttribute("data-category");
+    showNoteInModal(category, noteId);
+  }
+
   function handleDeleteButtonClick(event) {
     const noteId = event.target.getAttribute("data-id");
     const category = event.target.getAttribute("data-category");
     const currentUser = auth.currentUser;
 
-    // deleteNoteFromDatabase işlemini burada çağırın
     deleteNoteFromDatabase(currentUser.uid, category, noteId)
       .then(() => {
-        // Not başarıyla silindikten sonra kullanıcı arayüzünden de kaldırabilirsiniz.
         const deletedNoteElement = event.target.closest(
           ".col-12.col-lg-4.my-3"
         );
         deletedNoteElement.remove();
-
-        // Eğer notlarContainer'ın altında hiç not kalmadıysa, uygun bir mesaj gösterin
         const notesContainer = document.getElementById("notes-container");
         if (notesContainer.children.length === 0) {
           notesContainer.innerHTML = "";
@@ -495,18 +504,21 @@ document.addEventListener("DOMContentLoaded", function () {
    // "notes-container" elementine olay dinleyicilerini ekle
  
 
- //view
- document.querySelectorAll(".fa-solid.fa-eye").forEach((updateButton) => {
-   updateButton.addEventListener("click", (event) => {
-     handleViewButtonClick(event);
-   });
- });
-   // silme düğmeleri
-   document.querySelectorAll(".fa-solid.fa-trash").forEach((deleteButton) => {
-    deleteButton.addEventListener("click", (event) => {
-      handleDeleteButtonClick(event);
+   function addViewAndDeleteListeners() {
+    // View butonları
+    document.querySelectorAll(".fa-solid.fa-eye.view-button").forEach((viewButton) => {
+      viewButton.addEventListener("click", (event) => {
+        handleViewButtonClick(event);
+      });
     });
-  });
+  
+    // Delete butonları
+    document.querySelectorAll(".fa-solid.fa-trash.delete-button").forEach((deleteButton) => {
+      deleteButton.addEventListener("click", (event) => {
+        handleDeleteButtonClick(event);
+      });
+    });
+  }
 
   // Notu silmek için
   async function deleteNoteFromDatabase(userId, category, noteId) {
@@ -565,7 +577,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
-  // View butonlarına tıklama olayını dinlemek için
+  // View buton listener
   document
     .querySelectorAll(".fa-solid.fa-eye.view-button")
     .forEach((viewButton) => {
