@@ -115,13 +115,8 @@ if (username) {
   }
 }
 
-
 let isUpdate = false;
 document.addEventListener("DOMContentLoaded", function () {
-
-
-
-
   if (document.getElementById("logoutButton")) {
     const logoutButton = document.getElementById("logoutButton");
     logoutButton.addEventListener("click", () => {
@@ -140,14 +135,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
   function clearNoteForm() {
-    document.getElementById("category").value =
-      "<option selected disabled>Category</option>";
+    document.getElementById("category").selectedIndex = 0;
     document.getElementById("title").value = "";
-    quillEditor.setText(""); // editörün içini boşalt
+    quillEditor.setText(""); 
   }
- 
-  
- 
 
   function onAddOrEditNote(oParams) {
     if (oParams && Object.keys(oParams).length) {
@@ -156,12 +147,12 @@ document.addEventListener("DOMContentLoaded", function () {
           modules: {
             toolbar: [
               [{ header: [1, 2, false] }],
-              ['bold', 'italic', 'underline'],
-              ['image', 'code-block']
-            ]
+              ["bold", "italic", "underline"],
+              ["image", "code-block"],
+            ],
           },
-          placeholder: 'Note..',
-          theme: 'snow'
+          placeholder: "Note..",
+          theme: "snow",
         });
       }
       if (!window.noteTitleInput) {
@@ -171,7 +162,6 @@ document.addEventListener("DOMContentLoaded", function () {
         window.noteDescriptionInput = document.getElementById("editor");
       }
       if (oParams.isUpdate) {
-
         window.noteTitleInput.value = oParams.title;
 
         const delta = quillEditor.clipboard.convert(oParams.content);
@@ -182,59 +172,177 @@ document.addEventListener("DOMContentLoaded", function () {
         if (categoryInput) {
           categoryInput.value = oParams.category;
         }
- 
       } else {
         window.noteTitleInput.value = "";
         window.quillEditor.setContents([]);
       }
     }
- isUpdate = oParams.isUpdate;
+    isUpdate = oParams.isUpdate;
     $("#exampleModalCenter").on("hidden.bs.modal", function (e) {
       clearNoteForm();
     });
   }
-
-
-
-
-  //not ekleme kısmı +-+-+-
   
+  const notesContainer = document.getElementById("notes-container");
+  function fetchAndDisplayNotes(userId) {
+    const notesRef = ref(database, `notes/${userId}`);
+
+    get(notesRef)
+      .then((snapshot) => {
+        const notesData = snapshot.val();
+
+        if (notesData) {
+          notesContainer.innerHTML = ""; // notları temizle
+
+          Object.keys(notesData).forEach((noteId) => {
+            const note = notesData[noteId];
+
+            const noteHTML = `
+            <div class="col-12 col-lg-4 my-3">
+            <div class="notes">
+              <div class="row m-0 p-0">
+                <div class="col-12 title">${note.title}</div>
+                <div class="col-12"><hr /></div>
+                <div class="col-12 notIcerik">
+                  <p>${note.content}</p>
+                  <hr />
+                  <div class="row">
+                    <div class="col-6 my-2 catgTitle" data-category="${note.category}">${note.category}</div>
+                    <div class="col-6 text-right my-2"><i class="fa-solid fa-calendar-days"></i>${note.date}</div>
+                  </div>
+                </div>
+                <div class="over-layer">
+                <ul class="links">
+                    <li>
+                    <a
+                    href="javascript:void(0)"
+                    class="fa-solid fa-eye view-button"
+                    data-id="${noteId}"
+                    data-category="${note.category}"
+                  ></a>
+                    </li>
+                   <li><a title="Update" href="javascript:void(0)" class="fa-solid fa-pen-to-square" data-id="${noteId}" data-category="${note.category}"></a></li>
+                    <li><a title="Delete" href="javascript:void(0)" class="fa-solid fa-trash delete-button deneme" data-id="${noteId}"
+                    data-category="${note.category}"></a></li>
+                </ul>
+            </div>
+              </div>
+            </div>
+          </div> 
+            `;
+
+            notesContainer.insertAdjacentHTML("beforeend", noteHTML);
+          });
+             //view
+             document
+             .querySelectorAll(".fa-solid.fa-eye.view-button")
+             .forEach((viewButton) => {
+               viewButton.addEventListener("click", (event) => {
+                 const noteId = event.target.getAttribute("data-id");
+                 const category = event.target.getAttribute("data-category");
+
+                 showNoteInModal(category, noteId);
+               });
+             });
+           //sil
+           document
+             .querySelectorAll(".fa-solid.fa-trash.delete-button")
+             .forEach((deleteButton) => {
+               deleteButton.addEventListener("click", (event) => {
+                 const noteId = event.target.getAttribute("data-id");
+                 const category = event.target.getAttribute("data-category");
+                 const currentUser = auth.currentUser;
+
+                 // deleteNoteFromDatabase işlevini burada çağırın
+                 deleteNoteFromDatabase(currentUser.uid, category, noteId)
+                   .then(() => {
+                     // Not başarıyla silindikten sonra kullanıcı arayüzünden de kaldırabilirsiniz.
+                     const deletedNoteElement = event.target.closest(
+                       ".col-12.col-lg-4.my-3"
+                     );
+                     deletedNoteElement.remove();
+
+                     // Eğer notlarContainer'ın altında hiç not kalmadıysa, uygun bir mesaj gösterin
+                     const notesContainer =
+                       document.getElementById("notes-container");
+                     if (notesContainer.children.length === 0) {
+                       notesContainer.innerHTML = "Hiç Notunuz Yok";
+                     }
+                   })
+                   .catch((error) => {
+                     console.log("Hata:", error);
+                     alert(error.message);
+                   });
+               });
+             });
+        }
+      })
+      .catch((error) => {
+        console.log("Hata:", error);
+        alert(error.message);
+      });
+  }
+  //not ekleme kısmı +-+-+-
+
   if (document.getElementById("addButton")) {
     const form = document.getElementById("noteForm");
     form.addEventListener("submit", function (e) {
       e.preventDefault();
-      if(isUpdate===false){
-      const category = document.getElementById("category").value;
-      const title = document.getElementById("title").value;
-      const content = document.getElementById("editor").innerHTML;
- 
-      const currentUser = auth.currentUser;
-      const notesRef = ref(database, "notes/" + currentUser.uid);
-      const newNoteRef = push(notesRef);
-      const noteId = newNoteRef.key;
-      const newNote = {
-        isUpdate:false,
-        category: category, //
-        title: title,
-        content: content,
-        date: new Date().toLocaleDateString(),
-      };
- //
+      if (isUpdate) {
+        const currentUser = auth.currentUser;
+        const noteId = e.target.getAttribute("data-id");
 
-      set(newNoteRef, newNote)
-        .then(() => {
-          console.log("Not kaydedildi");
-          console.log(isUpdate);
-          Swal.fire("Add New Note!", "Note added successfully!", "success");
-          //modalı kapat
-          const deneme = document.getElementById("buttonClose");
-          deneme.click();
-          //modalı temzile
-          clearNoteForm();
+        // Güncelleme işlemi
+        updateNoteInDatabase(currentUser.uid, category, noteId, {
+          category: document.getElementById("category").value,
+          title: document.getElementById("title").value,
+          content: document.getElementById("editor").innerHTML,
+          date: new Date().toLocaleDateString(),
+        })
+          .then(() => {
+            console.log("Not güncellendi");
+            Swal.fire("Update Note!", "Note updated successfully!", "success");
+            // modalı kapat
+            const deneme = document.getElementById("buttonClose");
+            deneme.click();
+            // clearNoteForm();
+            fetchAndDisplayNotes(currentUser.uid);
+          })
+          .catch((error) => {
+            console.log("Hata:", error);
+            alert(error.message);
+          });
+      } else if (isUpdate === false) {
+        const category = document.getElementById("category").value;
+        const title = document.getElementById("title").value;
+        const content = document.getElementById("editor").innerHTML;
 
-          // Yeni notu listeye ekleme
-          const notesContainer = document.getElementById("notes-container");
-          const noteHTML = `
+        const currentUser = auth.currentUser;
+        const notesRef = ref(database, "notes/" + currentUser.uid);
+        const newNoteRef = push(notesRef);
+        const noteId = newNoteRef.key;
+        const newNote = {
+          isUpdate: false,
+          category: category, //
+          title: title,
+          content: content,
+          date: new Date().toLocaleDateString(),
+        };
+        //
+        set(newNoteRef, newNote)
+          .then(() => {
+            console.log("Not kaydedildi");
+            console.log(isUpdate);
+            Swal.fire("Add New Note!", "Note added successfully!", "success");
+            //modalı kapat
+            const deneme = document.getElementById("buttonClose");
+            deneme.click();
+            //modalı temzile
+            clearNoteForm();
+
+            // Yeni notu listeye ekleme
+            const notesContainer = document.getElementById("notes-container");
+            const noteHTML = `
             <div class="col-12 col-lg-4 my-3">
             <div class="notes">
               <div class="row m-0 p-0">
@@ -267,25 +375,34 @@ document.addEventListener("DOMContentLoaded", function () {
             </div>
           </div> 
             `;
-          notesContainer.insertAdjacentHTML("beforeend", noteHTML);
-          isUpdate = false; ///
-        })
-        .catch((error) => {
-          console.log("Hata:", error);
-          alert(error.message);
-        });
-       
-    }
+            notesContainer.insertAdjacentHTML("beforeend", noteHTML);
+            isUpdate = false; ///
+          })
+          .catch((error) => {
+            console.log("Hata:", error);
+            alert(error.message);
+          });
+      }
+      clearNoteForm();
       //modalı temzile
-      function clearNoteForm() {
+     /* function clearNoteForm() {
         document.getElementById("category").value =
           "<option selected disabled>Category</option>";
         document.getElementById("title").value = "asd";
         quillEditor.setText(""); // editörün içini boşalt
-      }
+      }*/
     });
   }
- 
+  async function updateNoteInDatabase(userId, category, noteId, updatedNote) {
+    const noteRef = ref(database, `notes/${userId}/${noteId}`);
+    try {
+      await update(noteRef, updatedNote);
+    } catch (error) {
+      console.log("Hata:", error);
+      alert(error.message);
+    }
+  }
+
   // tablodaki notları ekrana getirme
   if (document.getElementById("notes-container")) {
     const notesContainer = document.getElementById("notes-container");
@@ -300,430 +417,224 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
 
-     function fetchAndDisplayNotes(userId) {
-      const notesRef = ref(database, `notes/${userId}`);
-
-      get(notesRef)
-        .then((snapshot) => {
-          const notesData = snapshot.val();
-
-          if (notesData) {
-            notesContainer.innerHTML = ""; // notları temizle
-
-            Object.keys(notesData).forEach((noteId) => {
-              const note = notesData[noteId];
-
-              const noteHTML = `
-              <div class="col-12 col-lg-4 my-3">
-              <div class="notes">
-                <div class="row m-0 p-0">
-                  <div class="col-12 title">${note.title}</div>
-                  <div class="col-12"><hr /></div>
-                  <div class="col-12 notIcerik">
-                    <p>${note.content}</p>
-                    <hr />
-                    <div class="row">
-                      <div class="col-6 my-2 catgTitle" data-category="${note.category}">${note.category}</div>
-                      <div class="col-6 text-right my-2"><i class="fa-solid fa-calendar-days"></i>${note.date}</div>
-                    </div>
-                  </div>
-                  <div class="over-layer">
-                  <ul class="links">
-                      <li>
-                      <a
-                      href="javascript:void(0)"
-                      class="fa-solid fa-eye view-button"
-                      data-id="${noteId}"
-                      data-category="${note.category}"
-                    ></a>
-                      </li>
-                     <li><a title="Update" href="javascript:void(0)" class="fa-solid fa-pen-to-square" data-id="${noteId}" data-category="${note.category}"></a></li>
-                      <li><a title="Delete" href="javascript:void(0)" class="fa-solid fa-trash delete-button deneme" data-id="${noteId}"
-                      data-category="${note.category}"></a></li>
-                  </ul>
-              </div>
-                </div>
-              </div>
-            </div> 
-              `;
-
-              notesContainer.insertAdjacentHTML("beforeend", noteHTML);
-            });
-            //
-            //view
-            document
-              .querySelectorAll(".fa-solid.fa-eye.view-button")
-              .forEach((viewButton) => {
-                viewButton.addEventListener("click", (event) => {
-                  const noteId = event.target.getAttribute("data-id");
-                  const category = event.target.getAttribute("data-category");
-
-                  showNoteInModal(category, noteId);
-                });
-              });
-            //sil
-            document
-              .querySelectorAll(".fa-solid.fa-trash.delete-button")
-              .forEach((deleteButton) => {
-                deleteButton.addEventListener("click", (event) => {
-                  const noteId = event.target.getAttribute("data-id");
-                  const category = event.target.getAttribute("data-category");
-                  const currentUser = auth.currentUser;
-
-                  deleteNoteFromDatabase(currentUser.uid, category, noteId)
-                    .then(() => {
-                      const deletedNoteElement = event.target.closest(
-                        ".col-12.col-lg-4.my-3"
-                      );
-                      deletedNoteElement.remove();
-
-                      const notesContainer =
-                        document.getElementById("notes-container");
-                      if (notesContainer.children.length === 0) {
-                        notesContainer.innerHTML = "Hiç Notunuz Yok";
-                      }
-                    })
-                    .catch((error) => {
-                      console.log("Hata:", error);
-                      alert(error.message);
-                    });
-                });
-              });
-
-            /*  document.querySelectorAll(".fa-solid.fa-pen-to-square.update-button").forEach((updateButton) => {
-                updateButton.addEventListener("click", (event) => {
-                  const noteId = event.target.getAttribute("data-id");
-                  const category = event.target.getAttribute("data-category");
-                  handleUpdateButtonClick(noteId, category);
-                });
-              });*/
-
-          }
-        })
-        .catch((error) => {
-          console.log("Hata:", error);
-          alert(error.message);
-        });
-    }
-
-    function updateNoteInDatabase(
-      userId,
-      updatedCategory,
-      noteId,
-      updatedTitle,
-      updatedContent
-    ) {
-      const noteRef = ref(database, `notes/${userId}/${noteId}`);
-      if(isUpdate===true){
-      update(noteRef, {
-        category: updatedCategory,
-        title: updatedTitle,
-        content: updatedContent,
-        date: new Date().toLocaleDateString(),
-      })
-        .then(() => {
-          console.log("Note successfully updated");
-          console.log(isUpdate);
-          Swal.fire("Update Note", "Note updated successfully!", "success");
-           fetchAndDisplayNotes(userId);
-//////           isUpdate = false;
-        })
-        .catch((error) => {
-          console.log("Error:", error);
-          alert(error.message);
-        });
-      }
-    }
-
-
     if (document.getElementById("addButton")) {
-      document.getElementById("addButton").addEventListener("click", function (e) {
-        const newNoteParams = {
-          isUpdate: false,
-        };
-        onAddOrEditNote(newNoteParams);
-        $("#exampleModalCenter").modal("show");
-      });
-    }
-  document
-    .getElementById("notes-container")
-    .addEventListener("click", function (event) {
-      if (event.target.classList.contains("fa-pen-to-square")) {
-        handleUpdateButtonClick(event);
-        const noteId = event.target.getAttribute("data-id");
-        const category = event.target.getAttribute("data-category");
-        const noteRef = ref(
-          database,
-          `notes/${auth.currentUser.uid}/${noteId}`
-        );
- 
-        get(noteRef)
-          .then((snapshot) => {
-            const note = snapshot.val();
-            const oParams = {
-              isUpdate: true,
-              category: note.category, //+
-              title: note.title,
-              content: note.content,
-              noteId: noteId,
-            };
-            onAddOrEditNote(oParams);
-            $("#exampleModalCenter").modal("show");
-          })
-          .catch((error) => {
-            console.log("Error:", error);
-            alert(error.message);
-          });
-      } else if (event.target.classList.contains("btn-add")) {
-        const oParams = {
-          isUpdate: false,
-        };
-        onAddOrEditNote(oParams);
-        $("#exampleModalCenter").modal("show");
-        isUpdate = false; ///
-      }
-    });
-
-    
-  function handleUpdateButtonClick(event) {
-    event.preventDefault();
-    isUpdate = true;
-    if (auth.currentUser) {
-      const noteId = event.target.getAttribute("data-id");
-      const category = event.target.getAttribute("data-category");
-      const currentUser = auth.currentUser;
-  
-      const noteRef = ref(database, `notes/${currentUser.uid}/${noteId}`);
-      get(noteRef)
-        .then((snapshot) => {
-          const note = snapshot.val();
-          if (note) {
-            const oParams = {
-              isUpdate: true,
-              category: note.category,
-              title: note.title,
-              content: note.content,
-              noteId: noteId,
-            };
-            onAddOrEditNote(oParams);
-            $("#exampleModalCenter").modal("show");
-  
-            const saveButton = document.getElementById("submit-button");
-            
-            saveButton.removeEventListener("click", updateNoteInDatabase);
-
-            saveButton.addEventListener("click", () => {
-              const updatedTitle = document.getElementById("title").value;
-              const updatedContent = document.getElementById("editor").innerHTML;
-              const updatedCategory = document.getElementById("category").value;
-              updateNoteInDatabase(
-                currentUser.uid,
-                updatedCategory,
-                noteId,
-                updatedTitle,
-                updatedContent
-              );
-              saveButton.removeEventListener("click", updateNoteInDatabase);
-saveButton.addEventListener("click", updateNoteInDatabase);
-              $("#exampleModalCenter").modal("hide");
-            });
-          } else {
-            console.log("Note not found.");
-          }
-        })
-        .catch((error) => {
-          console.log("Error:", error);
-          alert(error.message);
-        });
-    } else {
-      alert("User is not logged in.");
-    }
-  }
- 
-
-    function handleViewButtonClick(event) {
-      const noteId = event.target.getAttribute("data-id");
-      const category = event.target.getAttribute("data-category");
-
-      showNoteInModal(category, noteId);
-    }
-
-    function handleDeleteButtonClick(event) {
-      const noteId = event.target.getAttribute("data-id");
-      const category = event.target.getAttribute("data-category");
-      const currentUser = auth.currentUser;
-
-      // deleteNoteFromDatabase işlemini burada çağırın
-      deleteNoteFromDatabase(currentUser.uid, category, noteId)
-        .then(() => {
-          const deletedNoteElement = event.target.closest(
-            ".col-12.col-lg-4.my-3"
-          );
-          deletedNoteElement.remove();
-
-          const notesContainer = document.getElementById("notes-container");
-          if (notesContainer.children.length === 0) {
-            notesContainer.innerHTML = "";
-          }
-        })
-        .catch((error) => {
-          console.log("Hata:", error);
-          alert(error.message);
+      document
+        .getElementById("addButton")
+        .addEventListener("click", function (e) {
+          const newNoteParams = {
+            isUpdate: false,
+          };
+          onAddOrEditNote(newNoteParams);
+          $("#exampleModalCenter").modal("show");
         });
     }
 
     document
       .getElementById("notes-container")
       .addEventListener("click", (event) => {
-         if (event.target.classList.contains("fa-trash")) {
-          handleDeleteButtonClick(event);
-        } else if (event.target.classList.contains("fa-eye")) {
-          handleViewButtonClick(event);
+        if (event.target.classList.contains("fa-pen-to-square")) {
+          const noteId = event.target.getAttribute("data-id");
+          const category = event.target.getAttribute("data-category");
+          handleUpdateButtonClick(noteId, category);
         }
       });
 
-    //view
-    document.querySelectorAll(".fa-solid.fa-eye").forEach((updateButton) => {
-      updateButton.addEventListener("click", (event) => {
-        handleViewButtonClick(event);
-      });
-    });
-
-    // silme düğmeleri
-    document.querySelectorAll(".fa-solid.fa-trash").forEach((deleteButton) => {
-      deleteButton.addEventListener("click", (event) => {
-        handleDeleteButtonClick(event);
-      });
-    });
-
-    // Notu silmek için
-    async function deleteNoteFromDatabase(userId, category, noteId) {
-      const noteRef = ref(database, `notes/${userId}/${noteId}`);
-      try {
-        // db den notu sil
-        await remove(noteRef);
-        console.log("Not başarıyla silindi");
-
-        Swal.fire("Delete!", "Note deleted successfully!", "success");
-
-        const deletedNoteElement = document.querySelector(
-          `[data-id="${noteId}"]`
-        );
-        if (deletedNoteElement) {
-          deletedNoteElement.remove();
-        }
-
-        const notesContainer = document.getElementById("notes-container");
-        if (notesContainer.children.length === 0) {
-          notesContainer.innerHTML = "Notlar henüz yüklenmedi";
-        }
-      } catch (error) {
-        console.log("Hata:", error);
-        alert(error.message);
-      }
-    }
-
-    //view
-    function showNoteInModal(category, noteId) {
-      //db den
-      const currentUser = auth.currentUser;
-      const noteRef = ref(database, `notes/${currentUser.uid}/${noteId}`);
+    function handleUpdateButtonClick(noteId, category) {
+      const noteRef = ref(database, `notes/${auth.currentUser.uid}/${noteId}`);
 
       get(noteRef)
         .then((snapshot) => {
           const note = snapshot.val();
-
-          // modalın içeriği
-          const modalTitleElement = document.getElementById("modalTitle");
-          const modalCategoryElement = document.getElementById("modalCategory");
-          const modalDateElement = document.getElementById("modalDate");
-          const modalContentElement = document.getElementById("modalContent");
-
-          modalTitleElement.textContent = note.title;
-          modalCategoryElement.textContent = category;
-          modalDateElement.textContent = note.date || "Belirtilmemiş";
-          modalContentElement.innerHTML = note.content;
-
-          // modalı göster
-          $("#modalView").modal("show");
+          const updateNoteParams = {
+            isUpdate: true,
+            title: note.title,
+            category: note.category,
+            content: note.content,
+          };
+          onAddOrEditNote(updateNoteParams);
+          // Eski not id'sini data-id attribute'unda saklamak için form elementine set edin
+          const form = document.getElementById("noteForm");
+          form.setAttribute("data-id", noteId);
+          // Modalı açın
+          $("#exampleModalCenter").modal("show");
+          
         })
         .catch((error) => {
           console.log("Hata:", error);
           alert(error.message);
         });
     }
+  }
 
-    // View btn tıklama  dinlemek için
-    document
-      .querySelectorAll(".fa-solid.fa-eye.view-button")
-      .forEach((viewButton) => {
-        viewButton.addEventListener("click", (event) => {
-          const noteId = event.target.getAttribute("data-id");
-          const category = event.target.getAttribute("data-category");
+  function handleDeleteButtonClick(event) {
+    const noteId = event.target.getAttribute("data-id");
+    const category = event.target.getAttribute("data-category");
+    const currentUser = auth.currentUser;
 
-          showNoteInModal(category, noteId);
-        });
-      });
-
-    if (document.getElementById("searchInput")) {
-      //search kısmı
-      const searchInput = document.getElementById("searchInput");
-      searchInput.addEventListener("input", handleSearch);
-
-      function handleSearch() {
-        const searchText = searchInput.value.toLowerCase();
-
-        const notesContainers = document.querySelectorAll(
+    // deleteNoteFromDatabase işlemini burada çağırın
+    deleteNoteFromDatabase(currentUser.uid, category, noteId)
+      .then(() => {
+        // Not başarıyla silindikten sonra kullanıcı arayüzünden de kaldırabilirsiniz.
+        const deletedNoteElement = event.target.closest(
           ".col-12.col-lg-4.my-3"
         );
+        deletedNoteElement.remove();
 
-        notesContainers.forEach((notesContainer) => {
-          const title = notesContainer
-            .querySelector(".title")
-            .textContent.toLowerCase(); // başlık
-          const content = notesContainer
-            .querySelector(".notIcerik")
-            .textContent.toLowerCase(); // içerik
+        // Eğer notlarContainer'ın altında hiç not kalmadıysa, uygun bir mesaj gösterin
+        const notesContainer = document.getElementById("notes-container");
+        if (notesContainer.children.length === 0) {
+          notesContainer.innerHTML = "";
+        }
+      })
+      .catch((error) => {
+        console.log("Hata:", error);
+        alert(error.message);
+      });
+  }
 
-          // Eşleşmeyi kontrol et
-          if (title.includes(searchText) || content.includes(searchText)) {
-            notesContainer.style.display = "block";
-          } else {
-            notesContainer.style.display = "none";
-          }
-        });
+   // "notes-container" elementine olay dinleyicilerini ekle
+ 
+
+ //view
+ document.querySelectorAll(".fa-solid.fa-eye").forEach((updateButton) => {
+   updateButton.addEventListener("click", (event) => {
+     handleViewButtonClick(event);
+   });
+ });
+   // silme düğmeleri
+   document.querySelectorAll(".fa-solid.fa-trash").forEach((deleteButton) => {
+    deleteButton.addEventListener("click", (event) => {
+      handleDeleteButtonClick(event);
+    });
+  });
+
+  // Notu silmek için
+  async function deleteNoteFromDatabase(userId, category, noteId) {
+    const noteRef = ref(database, `notes/${userId}/${noteId}`);
+    try {
+      // db den notu sil
+      await remove(noteRef);
+      console.log("Not başarıyla silindi");
+
+      Swal.fire("Delete!", "Note deleted successfully!", "success");
+
+      const deletedNoteElement = document.querySelector(
+        `[data-id="${noteId}"]`
+      );
+      if (deletedNoteElement) {
+        deletedNoteElement.remove();
       }
 
-      const categoryButtons = document.querySelectorAll(".btn-ctg");
+      const notesContainer = document.getElementById("notes-container");
+      if (notesContainer.children.length === 0) {
+        notesContainer.innerHTML = "Notlar henüz yüklenmedi";
+      }
+    } catch (error) {
+      console.log("Hata:", error);
+      alert(error.message);
+    }
+  }
+
+  //view
+  function showNoteInModal(category, noteId) {
+    //db den
+    const currentUser = auth.currentUser;
+    const noteRef = ref(database, `notes/${currentUser.uid}/${noteId}`);
+
+    get(noteRef)
+      .then((snapshot) => {
+        const note = snapshot.val();
+
+        // modalın içeriği
+        const modalTitleElement = document.getElementById("modalTitle");
+        const modalCategoryElement = document.getElementById("modalCategory");
+        const modalDateElement = document.getElementById("modalDate");
+        const modalContentElement = document.getElementById("modalContent");
+
+        modalTitleElement.textContent = note.title;
+        modalCategoryElement.textContent = category;
+        modalDateElement.textContent = note.date || "Belirtilmemiş";
+        modalContentElement.innerHTML = note.content;
+
+        // modalı göster
+        $("#modalView").modal("show");
+      })
+      .catch((error) => {
+        console.log("Hata:", error);
+        alert(error.message);
+      });
+  }
+
+  // View butonlarına tıklama olayını dinlemek için
+  document
+    .querySelectorAll(".fa-solid.fa-eye.view-button")
+    .forEach((viewButton) => {
+      viewButton.addEventListener("click", (event) => {
+        const noteId = event.target.getAttribute("data-id");
+        const category = event.target.getAttribute("data-category");
+
+        showNoteInModal(category, noteId);
+      });
+    });
+
+  if (document.getElementById("searchInput")) {
+    //search kısmı
+    const searchInput = document.getElementById("searchInput");
+    searchInput.addEventListener("input", handleSearch);
+
+    function handleSearch() {
+      const searchText = searchInput.value.toLowerCase();
+
+      const notesContainers = document.querySelectorAll(
+        ".col-12.col-lg-4.my-3"
+      );
+
+      notesContainers.forEach((notesContainer) => {
+        const title = notesContainer
+          .querySelector(".title")
+          .textContent.toLowerCase(); // başlık
+        const content = notesContainer
+          .querySelector(".notIcerik")
+          .textContent.toLowerCase(); // içerik
+
+        // Eşleşmeyi kontrol et
+        if (title.includes(searchText) || content.includes(searchText)) {
+          notesContainer.style.display = "block";
+        } else {
+          notesContainer.style.display = "none";
+        }
+      });
+    }
+
+    const categoryButtons = document.querySelectorAll(".btn-ctg");
+    categoryButtons.forEach((button) => {
+      button.addEventListener("click", handleCategoryFilter);
+    });
+
+    //category butonları
+    function handleCategoryFilter(event) {
+      const selectedCategory = event.target.dataset.category;
+
+      const notesContainers = document.querySelectorAll(
+        ".col-12.col-lg-4.my-3"
+      );
+
+      notesContainers.forEach((notesContainer) => {
+        const category = notesContainer
+          .querySelector(".catgTitle")
+          .textContent.toLowerCase();
+
+        if (selectedCategory === "all" || category === selectedCategory) {
+          notesContainer.style.display = "block"; // Eşleşirse göster
+        } else {
+          notesContainer.style.display = "none"; // Eşleşmezse gizle
+        }
+      });
+      // butona active at
       categoryButtons.forEach((button) => {
-        button.addEventListener("click", handleCategoryFilter);
+        button.classList.remove("active");
       });
-
-      //category butonları
-      function handleCategoryFilter(event) {
-        const selectedCategory = event.target.dataset.category;
-
-        const notesContainers = document.querySelectorAll(
-          ".col-12.col-lg-4.my-3"
-        );
-
-        notesContainers.forEach((notesContainer) => {
-          const category = notesContainer
-            .querySelector(".catgTitle")
-            .textContent.toLowerCase();
-
-          if (selectedCategory === "all" || category === selectedCategory) {
-            notesContainer.style.display = "block";  
-          } else {
-            notesContainer.style.display = "none";  
-          }
-        });
-        // butona active at
-        categoryButtons.forEach((button) => {
-          button.classList.remove("active");
-        });
-        event.target.classList.add("active");
-      }
+      event.target.classList.add("active");
     }
   }
 });
