@@ -16,10 +16,8 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
-    <link
-      href="https://cdn.quilljs.com/1.3.6/quill.snow.css"
-      rel="stylesheet"
-    />
+    <script src="//cdn.quilljs.com/1.2.2/quill.min.js"></script>
+    <link href="//cdn.quilljs.com/1.2.2/quill.snow.css" rel="stylesheet">
   </head>
   <body>
     <section>
@@ -33,7 +31,8 @@
               </div>
               <div class="col-2 text-right">
                 <div class="dropdown">
-                  <button class="btn btn-secondary" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <button class="btn btn-user" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa-regular fa-user"></i> &nbsp;
                     <div class="d-flex float-left" id="kullaniciName"></div> &nbsp; <i class="fa-solid fa-chevron-down"></i>
                   </button>
                   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
@@ -159,7 +158,7 @@
         <h6 id="modalCategory"></h6>
         <div id="modalContent"></div>
         <p class="text-right float-right" id="modalDate"></p>
-        <i class="fa-solid fa-calendar-days float-right"></i>
+        <i class="fa-solid fa-calendar-days float-right viewIcon"></i>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -172,7 +171,6 @@
  
     </section>
   </body>
-  <script src="script.js" type="module"></script>
 
   <script
     src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
@@ -191,8 +189,8 @@
   ></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <!-- Include the Quill library -->
-  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-
+  <script src="https://cdn.quilljs.com/1.2.2/quill.min.js"></script>
+  <script src="https://cdn.rawgit.com/kensnyder/quill-image-resize-module/3411c9a7/image-resize.min.js"></script>
   <!-- Initialize Quill editor -->
   <script>
  
@@ -200,5 +198,6 @@
   </script>
   
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" ></script>
+  <script src="script.js" type="module"></script>
 
 </html>

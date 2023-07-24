@@ -71,7 +71,7 @@ if (document.getElementById("signup")) {
 if (document.getElementById("login")) {
   const loginButton = document.getElementById("login");
 
-  login.addEventListener("click", (e) => {
+  const loginFunction = () => {
     var emailLog = document.getElementById("emailLog").value;
     var passwordLog = document.getElementById("passwordLog").value;
 
@@ -104,8 +104,19 @@ if (document.getElementById("login")) {
         console.log("Error signing in:", error);
         alert(error.message);
       });
+  };
+ 
+  loginButton.addEventListener("click", (e) => {
+    loginFunction();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      loginFunction();
+    }
   });
 }
+
 //username yaz
 const username = localStorage.getItem("username");
 if (username) {
@@ -154,6 +165,9 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!window.quillEditor) {
         window.quillEditor = new Quill("#editor", {
           modules: {
+              imageResize: {
+          displaySize: true
+        },
             toolbar: [
               [{ header: [1, 2, false] }],
               ["bold", "italic", "underline"],
@@ -217,7 +231,7 @@ document.addEventListener("DOMContentLoaded", function () {
                   <hr />
                   <div class="row">
                     <div class="col-6 my-2 catgTitle" data-category="${note.category}">${note.category}</div>
-                    <div class="col-6 text-right my-2"><i class="fa-solid fa-calendar-days"></i>${note.date}</div>
+                    <div class="col-6 text-right my-2"><i class="fa-solid fa-calendar-days mr-1"></i>${note.date}</div>
                   </div>
                 </div>
                 <div class="over-layer">
@@ -271,9 +285,9 @@ document.addEventListener("DOMContentLoaded", function () {
                      deletedNoteElement.remove();
                      const notesContainer =
                        document.getElementById("notes-container");
-                     if (notesContainer.children.length === 0) {
+                     /*if (notesContainer.children.length === 0) {
                        notesContainer.innerHTML = "Hiç Notunuz Yok";
-                     }
+                     }*/
                    })
                    .catch((error) => {
                      console.log("Hata:", error);
@@ -360,7 +374,7 @@ document.addEventListener("DOMContentLoaded", function () {
                   <hr />
                   <div class="row">
                     <div class="col-6 my-2 catgTitle"  data-category="${category}">${category}</div>
-                    <div class="col-6 text-right my-2"><i class="fa-solid fa-calendar-days"></i>${new Date().toLocaleDateString()}</div>
+                    <div class="col-6 text-right my-2"><i class="fa-solid fa-calendar-days mr-1"></i>${new Date().toLocaleDateString()}</div>
                   </div>
                 </div>
                 <div class="over-layer">
