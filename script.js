@@ -627,6 +627,11 @@ document.addEventListener("DOMContentLoaded", function () {
     searchInput.addEventListener("input", handleSearch);
 
     function handleSearch() {
+      categoryButtons.forEach((button) => {
+        button.classList.remove("active");
+      });
+      document.getElementById("allCategory").classList.add("active");
+
       const searchText = searchInput.value.toLowerCase();
 
       const notesContainers = document.querySelectorAll(
@@ -636,12 +641,12 @@ document.addEventListener("DOMContentLoaded", function () {
       notesContainers.forEach((notesContainer) => {
         const title = notesContainer
           .querySelector(".title")
-          .textContent.toLowerCase(); // başlık
+          .textContent.toLowerCase(); 
         const content = notesContainer
           .querySelector(".notIcerik")
-          .textContent.toLowerCase(); // içerik
+          .textContent.toLowerCase(); 
 
-        // Eşleşmeyi kontrol et
+
         if (title.includes(searchText) || content.includes(searchText)) {
           notesContainer.style.display = "block";
         } else {
