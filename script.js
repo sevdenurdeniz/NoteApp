@@ -236,12 +236,12 @@ document.addEventListener("DOMContentLoaded", function () {
             <div class="col-12 col-lg-4 my-3">
             <div class="notes">
               <div class="row m-0 p-0">
-                <div class="col-12 title">${note.title}</div>
+                <div class="col-12 title"><span>${note.title}</span></div>
                 <div class="col-12"><hr /></div>
                 <div class="col-12 notIcerik">
                   <p>${note.content}</p>
                   <hr />
-                  <div class="row">
+                  <div class="row mb-3">
                     <div class="col-6 my-2 catgTitle" data-category="${note.category}">${note.category}</div>
                     <div class="col-6 text-right my-2"><i class="fa-solid fa-calendar-days mr-1"></i>${note.date}</div>
                   </div>
@@ -381,12 +381,12 @@ document.addEventListener("DOMContentLoaded", function () {
             <div class="col-12 col-lg-4 my-3">
             <div class="notes">
               <div class="row m-0 p-0">
-                <div class="col-12 title">${title}</div>
+                <div class="col-12 title"><span>${title}</span></div>
                 <div class="col-12"><hr /></div>
                 <div class="col-12 notIcerik">
                   <p>${content}</p>
                   <hr />
-                  <div class="row">
+                  <div class="row mb-3">
                     <div class="col-6 my-2 catgTitle"  data-category="${category}">${category}</div>
                     <div class="col-6 text-right my-2"><i class="fa-solid fa-calendar-days mr-1"></i>${new Date().toLocaleDateString()}</div>
                   </div>

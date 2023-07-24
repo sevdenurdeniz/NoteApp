@@ -17,7 +17,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
     <script src="//cdn.quilljs.com/1.2.2/quill.min.js"></script>
-    <link href="//cdn.quilljs.com/1.2.2/quill.snow.css" rel="stylesheet">
+    <link href="//cdn.quilljs.com/1.2.2/quill.snow.css" rel="stylesheet" />
   </head>
   <body>
     <section>
@@ -27,18 +27,38 @@
             <div class="row">
               <div class="col-9">
                 <i class="fa fa-search searchIcon"></i>
-                <input class="searchInput" type="search" placeholder="Search" id="searchInput" />
+                <input
+                  class="searchInput"
+                  type="search"
+                  placeholder="Search"
+                  id="searchInput"
+                />
               </div>
               <div class="col-3 text-right">
                 <div class="dropdown">
-                  <button class="btn btn-user dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fa-regular fa-user"></i> &nbsp;  <span id="kullaniciName"></span>
+                  <button
+                    class="btn btn-user dropdown-toggle"
+                    type="button"
+                    id="dropdownMenuButton"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                  >
+                    <i class="fa-regular fa-user"></i> &nbsp;
+                    <span id="kullaniciName"></span>
                   </button>
-                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item p-0" href="#"> <button class="btn btn-exit btn-sm" id="logoutButton"><i class="fa-solid fa-up-right-from-square"></i>&nbsp;Çıkış Yap</button></a>
+                  <div
+                    class="dropdown-menu"
+                    aria-labelledby="dropdownMenuButton"
+                  >
+                    <a class="dropdown-item p-0" href="#">
+                      <button class="btn btn-exit btn-sm" id="logoutButton">
+                        <i class="fa-solid fa-up-right-from-square"></i
+                        >&nbsp;Çıkış Yap
+                      </button></a
+                    >
                   </div>
                 </div>
-           
               </div>
             </div>
           </div>
@@ -48,23 +68,23 @@
         <div class="row mt-4">
           <div class="col-9">
             <button class="btn btn-ctg active" data-category="all">All</button>
-            <button class="btn btn-ctg" data-category="business">Business</button>
-            <button class="btn btn-ctg" data-category="personal">Personal</button>
+            <button class="btn btn-ctg" data-category="business">
+              Business
+            </button>
+            <button class="btn btn-ctg" data-category="personal">
+              Personal
+            </button>
             <button class="btn btn-ctg" data-category="project">Project</button>
           </div>
           <div class="col-3 text-right">
-            <button
-              type="button"
-              class="btn btn-add"
-              id="addButton"
-            >
+            <button type="button" class="btn btn-add" id="addButton">
               <i class="fa-solid fa-plus"></i> Add New Note
             </button>
 
             <!--add edit  w  notes Modal -->
             <div
               class="modal fade"
-              id="exampleModalCenter" 
+              id="exampleModalCenter"
               role="dialog"
               aria-labelledby="exampleModalCenterTitle"
               aria-hidden="true"
@@ -72,9 +92,7 @@
               <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title" id="modalLabel">
-                      Add New Note
-                    </h5>
+                    <h5 class="modal-title" id="modalLabel">Add New Note</h5>
                     <button
                       type="button"
                       class="close"
@@ -85,7 +103,6 @@
                     </button>
                   </div>
                   <form id="noteForm">
- 
                     <div class="modal-body">
                       <div class="row text-left">
                         <div class="col-6 form-group">
@@ -135,45 +152,66 @@
           </div>
         </div>
       </div>
-
-
+      <div class="spinner">
+        <div id="loadingMessage" style="display: none">
+          Notes are loading...
+        </div>
+        <div class="ort">
+          <div
+            id="loadingSpinner"
+            class="spinner"
+            style="display: none"
+          ></div>
+        </div>
+      </div>
       <div class="container">
-         <!-- //spinner -->
-<div id="loadingMessage" style="display: none;">Notes are loading...</div>
-
-<div id="loadingSpinner" class="spinner" style="display: none;"></div>
-
+       
         <div class="row" id="notes-container"></div>
       </div>
+      <!-- View Modal -->
+      <div
+        class="modal fade"
+        id="modalView"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="exampleModalCenterTitle2"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modalTitle">
+                Not Başlığı Buraya gelsin
+              </h5>
+              <button
+                type="button"
+                class="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <h6 id="modalCategory"></h6>
+              <div id="modalContent"></div>
+              <p class="text-right float-right" id="modalDate"></p>
+              <i class="fa-solid fa-calendar-days float-right viewIcon"></i>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-dismiss="modal"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-    
-   <!-- View Modal -->
-<div class="modal fade" id="modalView" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle2" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalTitle">
-          Not Başlığı Buraya gelsin
-        </h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <h6 id="modalCategory"></h6>
-        <div id="modalContent"></div>
-        <p class="text-right float-right" id="modalDate"></p>
-        <i class="fa-solid fa-calendar-days float-right viewIcon"></i>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- güncelleme modalı -->
- 
+      <!-- güncelleme modalı -->
     </section>
   </body>
 
@@ -197,12 +235,8 @@
   <script src="https://cdn.quilljs.com/1.2.2/quill.min.js"></script>
   <script src="https://cdn.rawgit.com/kensnyder/quill-image-resize-module/3411c9a7/image-resize.min.js"></script>
   <!-- Initialize Quill editor -->
-  <script>
- 
+  <script></script>
 
-  </script>
-  
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" ></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="script.js" type="module"></script>
-
 </html>
