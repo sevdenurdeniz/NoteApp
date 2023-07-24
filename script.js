@@ -145,6 +145,16 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
   }
+
+  function showLoading() {
+    document.getElementById("loadingSpinner").style.display = "block";
+    document.getElementById("loadingMessage").style.display = "block";
+  }
+  function hideLoading() {
+    document.getElementById("loadingSpinner").style.display = "none";
+    document.getElementById("loadingMessage").style.display = "none";
+  }
+
   function clearNoteForm() {
     const categoryElement = document.getElementById("category");
     if (categoryElement) {
@@ -208,10 +218,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const notesContainer = document.getElementById("notes-container");
   function fetchAndDisplayNotes(userId) {
+    showLoading();
     const notesRef = ref(database, `notes/${userId}`);
 
     get(notesRef)
       .then((snapshot) => {
+        hideLoading();
         const notesData = snapshot.val();
 
         if (notesData) {
@@ -298,6 +310,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       })
       .catch((error) => {
+        hideLoading();
         console.log("Hata:", error);
         alert(error.message);
       });

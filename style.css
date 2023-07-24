@@ -472,6 +472,7 @@ button:focus {
 
 .notes {
 	position: relative;
+	height: 100%;
 }
 
 .notes img {
@@ -569,11 +570,12 @@ button:focus {
 	width: 100%;
 	height: 100%;
 } */
-.viewIcon{
+.viewIcon {
 	position: relative;
-    top: 3px;
-    margin-right: 4px;
+	top: 3px;
+	margin-right: 4px;
 }
+
 .catgTitle[data-category="Business"] {
 	color: #e87bb9;
 }
@@ -605,30 +607,83 @@ button:focus {
 	top: 33%;
 	color: #6c757d;
 }
-.btn-user{
+
+.btn-user {
 	background: transparent;
 	color: #8781d8;
-    border: none;
+	border: none;
 }
-.btn-user .fa-user{
+
+.btn-user .fa-user {
 	display: flex;
-    float: left;
-    position: relative;
-    top: 3px;
+	float: left;
+	position: relative;
+	top: 3px;
 	margin-right: 1px;
 }
-.btn-user:hover{
+
+.btn-user:hover {
 	color: #343437;
 }
-.btn-user:focus{
+
+.btn-user:focus {
 	box-shadow: 0 0 0 0.2rem rgb(204 192 227 / 25%);
 }
-.ql-align-center{
+
+.ql-align-center {
 	display: none !important;
 }
 
-.downButton{
-    position: absolute;
-    top: 27%;
-    right: -14%;
+.downButton {
+	position: absolute;
+	top: 27%;
+	right: -14%;
+}
+
+#loadingSpinner {
+	border: 4px solid rgb(135 129 216);
+	border-top: 4px solid #ededed;
+	border-radius: 50%;
+	width: 40px;
+	height: 40px;
+	animation: spin 2s linear infinite;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 1000;
+}
+
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+#loadingMessage {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 1000;
+	margin-top: 5%;
+	color: #8781d8;
+}
+
+.dropdown-item:active {
+	background-color: #8781d87e;
+}
+.dropdown-item:hover .btn-exit{
+	color:#212121;
+}
+
+.btn-exit{
+	background: #00000000;
+    color: #bebfc0;
+    border: none;
+    width: 100%;
 }

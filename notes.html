@@ -35,7 +35,7 @@
                     <i class="fa-regular fa-user"></i> &nbsp;  <span id="kullaniciName"></span>
                   </button>
                   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item" href="#"> <button class="btn btn-danger btn-sm" id="logoutButton"><i class="fa-solid fa-up-right-from-square"></i>Çıkış Yap</button></a>
+                    <a class="dropdown-item p-0" href="#"> <button class="btn btn-exit btn-sm" id="logoutButton"><i class="fa-solid fa-up-right-from-square"></i>&nbsp;Çıkış Yap</button></a>
                   </div>
                 </div>
            
@@ -138,6 +138,11 @@
 
 
       <div class="container">
+         <!-- //spinner -->
+<div id="loadingMessage" style="display: none;">Notes are loading...</div>
+
+<div id="loadingSpinner" class="spinner" style="display: none;"></div>
+
         <div class="row" id="notes-container"></div>
       </div>
 
