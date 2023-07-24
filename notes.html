@@ -67,7 +67,13 @@
       <div class="container my-2">
         <div class="row mt-4">
           <div class="col-9">
-            <button class="btn btn-ctg active" id="allCategory" data-category="all">All</button>
+            <button
+              class="btn btn-ctg active"
+              id="allCategory"
+              data-category="all"
+            >
+              All
+            </button>
             <button class="btn btn-ctg" data-category="business">
               Business
             </button>
@@ -152,20 +158,17 @@
           </div>
         </div>
       </div>
-      <div class="spinner">
+
+      <div id="spinner" class="spinner">
         <div id="loadingMessage" style="display: none">
           Notes are loading...
         </div>
         <div class="ort">
-          <div
-            id="loadingSpinner"
-            class="spinner"
-            style="display: none"
-          ></div>
+          <div id="loadingSpinner" class="spinner" style="display: none"></div>
         </div>
       </div>
+
       <div class="container">
-       
         <div class="row" id="notes-container"></div>
       </div>
       <!-- View Modal -->

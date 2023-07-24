@@ -147,10 +147,12 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function showLoading() {
+    document.getElementById("spinner").style.display = "block";
     document.getElementById("loadingSpinner").style.display = "block";
     document.getElementById("loadingMessage").style.display = "block";
   }
   function hideLoading() {
+    document.getElementById("spinner").style.display = "none";
     document.getElementById("loadingSpinner").style.display = "none";
     document.getElementById("loadingMessage").style.display = "none";
   }
@@ -176,7 +178,7 @@ document.addEventListener("DOMContentLoaded", function () {
         window.quillEditor = new Quill("#editor", {
           modules: {
             imageResize: {
-              modules: [`Resize`]
+              modules: [`Resize`],
             },
             toolbar: [
               [{ header: [1, 2, false] }],
@@ -464,6 +466,15 @@ document.addEventListener("DOMContentLoaded", function () {
           };
           onAddOrEditNote(newNoteParams);
           $("#exampleModalCenter").modal("show");
+          //add new note- category
+          const allButton = document.getElementById("allCategory");
+          allButton.click();
+          const categoryButtons = document.querySelectorAll(".btn-ctg");
+          categoryButtons.forEach((button) => {
+            button.classList.remove("active");
+          });
+
+          allButton.classList.add("active");
         });
     }
 
@@ -641,11 +652,10 @@ document.addEventListener("DOMContentLoaded", function () {
       notesContainers.forEach((notesContainer) => {
         const title = notesContainer
           .querySelector(".title")
-          .textContent.toLowerCase(); 
+          .textContent.toLowerCase();
         const content = notesContainer
           .querySelector(".notIcerik")
-          .textContent.toLowerCase(); 
-
+          .textContent.toLowerCase();
 
         if (title.includes(searchText) || content.includes(searchText)) {
           notesContainer.style.display = "block";
@@ -694,6 +704,4 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
   // ...
-
-
 });
