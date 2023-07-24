@@ -358,7 +358,9 @@ document.addEventListener("DOMContentLoaded", function () {
             const deneme = document.getElementById("buttonClose");
             deneme.click();
             //modalı temzile
-            clearNoteForm();
+            $("#exampleModalCenter").on("hidden.bs.modal", function (e) {
+              clearNoteForm();
+            });
 
             // Yeni notu listeye ekleme
             const notesContainer = document.getElementById("notes-container");
@@ -404,7 +406,9 @@ document.addEventListener("DOMContentLoaded", function () {
             alert(error.message);
           });
       }
-      clearNoteForm();
+      $("#exampleModalCenter").on("hidden.bs.modal", function (e) {
+        clearNoteForm();
+      });
       //modalı temzile
       /* function clearNoteForm() {
         document.getElementById("category").value =
@@ -671,4 +675,7 @@ document.addEventListener("DOMContentLoaded", function () {
       $(".ql-container > :last-child").css("display", "none");
     });
   });
+  // ...
+
+
 });
