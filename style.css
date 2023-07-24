@@ -623,3 +623,12 @@ button:focus {
 .btn-user:focus{
 	box-shadow: 0 0 0 0.2rem rgb(204 192 227 / 25%);
 }
+.ql-align-center{
+	display: none !important;
+}
+
+.downButton{
+    position: absolute;
+    top: 27%;
+    right: -14%;
+}

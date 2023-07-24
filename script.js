@@ -105,7 +105,7 @@ if (document.getElementById("login")) {
         alert(error.message);
       });
   };
- 
+
   loginButton.addEventListener("click", (e) => {
     loginFunction();
   });
@@ -165,9 +165,9 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!window.quillEditor) {
         window.quillEditor = new Quill("#editor", {
           modules: {
-              imageResize: {
-          displaySize: true
-        },
+            imageResize: {
+              modules: [`Resize`]
+            },
             toolbar: [
               [{ header: [1, 2, false] }],
               ["bold", "italic", "underline"],
@@ -205,7 +205,7 @@ document.addEventListener("DOMContentLoaded", function () {
       clearNoteForm();
     });
   }
-  
+
   const notesContainer = document.getElementById("notes-container");
   function fetchAndDisplayNotes(userId) {
     const notesRef = ref(database, `notes/${userId}`);
@@ -256,45 +256,45 @@ document.addEventListener("DOMContentLoaded", function () {
 
             notesContainer.insertAdjacentHTML("beforeend", noteHTML);
           });
-             //view
-             document
-             .querySelectorAll(".fa-solid.fa-eye.view-button")
-             .forEach((viewButton) => {
-               viewButton.addEventListener("click", (event) => {
-                 const noteId = event.target.getAttribute("data-id");
-                 const category = event.target.getAttribute("data-category");
+          //view
+          document
+            .querySelectorAll(".fa-solid.fa-eye.view-button")
+            .forEach((viewButton) => {
+              viewButton.addEventListener("click", (event) => {
+                const noteId = event.target.getAttribute("data-id");
+                const category = event.target.getAttribute("data-category");
 
-                 showNoteInModal(category, noteId);
-               });
-             });
-           //sil
-           document
-             .querySelectorAll(".fa-solid.fa-trash.delete-button")
-             .forEach((deleteButton) => {
-               deleteButton.addEventListener("click", (event) => {
-                 const noteId = event.target.getAttribute("data-id");
-                 const category = event.target.getAttribute("data-category");
-                 const currentUser = auth.currentUser;
+                showNoteInModal(category, noteId);
+              });
+            });
+          //sil
+          document
+            .querySelectorAll(".fa-solid.fa-trash.delete-button")
+            .forEach((deleteButton) => {
+              deleteButton.addEventListener("click", (event) => {
+                const noteId = event.target.getAttribute("data-id");
+                const category = event.target.getAttribute("data-category");
+                const currentUser = auth.currentUser;
 
-                 // deleteNoteFromDatabase işlevini burada çağırın
-                 deleteNoteFromDatabase(currentUser.uid, category, noteId)
-                   .then(() => {
-                     const deletedNoteElement = event.target.closest(
-                       ".col-12.col-lg-4.my-3"
-                     );
-                     deletedNoteElement.remove();
-                     const notesContainer =
-                       document.getElementById("notes-container");
-                     /*if (notesContainer.children.length === 0) {
+                // deleteNoteFromDatabase işlevini burada çağırın
+                deleteNoteFromDatabase(currentUser.uid, category, noteId)
+                  .then(() => {
+                    const deletedNoteElement = event.target.closest(
+                      ".col-12.col-lg-4.my-3"
+                    );
+                    deletedNoteElement.remove();
+                    const notesContainer =
+                      document.getElementById("notes-container");
+                    /*if (notesContainer.children.length === 0) {
                        notesContainer.innerHTML = "Hiç Notunuz Yok";
                      }*/
-                   })
-                   .catch((error) => {
-                     console.log("Hata:", error);
-                     alert(error.message);
-                   });
-               });
-             });
+                  })
+                  .catch((error) => {
+                    console.log("Hata:", error);
+                    alert(error.message);
+                  });
+              });
+            });
         }
       })
       .catch((error) => {
@@ -360,7 +360,6 @@ document.addEventListener("DOMContentLoaded", function () {
             //modalı temzile
             clearNoteForm();
 
-
             // Yeni notu listeye ekleme
             const notesContainer = document.getElementById("notes-container");
             const noteHTML = `
@@ -398,7 +397,7 @@ document.addEventListener("DOMContentLoaded", function () {
             `;
             notesContainer.insertAdjacentHTML("beforeend", noteHTML);
             isUpdate = false; ///
-            addViewAndDeleteListeners();//
+            addViewAndDeleteListeners(); //
           })
           .catch((error) => {
             console.log("Hata:", error);
@@ -407,7 +406,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       clearNoteForm();
       //modalı temzile
-     /* function clearNoteForm() {
+      /* function clearNoteForm() {
         document.getElementById("category").value =
           "<option selected disabled>Category</option>";
         document.getElementById("title").value = "asd";
@@ -478,7 +477,6 @@ document.addEventListener("DOMContentLoaded", function () {
           const form = document.getElementById("noteForm");
           form.setAttribute("data-id", noteId);
           $("#exampleModalCenter").modal("show");
-          
         })
         .catch((error) => {
           console.log("Hata:", error);
@@ -515,23 +513,26 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
-   // "notes-container" elementine olay dinleyicilerini ekle
- 
+  // "notes-container" elementine olay dinleyicilerini ekle
 
-   function addViewAndDeleteListeners() {
+  function addViewAndDeleteListeners() {
     // View butonları
-    document.querySelectorAll(".fa-solid.fa-eye.view-button").forEach((viewButton) => {
-      viewButton.addEventListener("click", (event) => {
-        handleViewButtonClick(event);
+    document
+      .querySelectorAll(".fa-solid.fa-eye.view-button")
+      .forEach((viewButton) => {
+        viewButton.addEventListener("click", (event) => {
+          handleViewButtonClick(event);
+        });
       });
-    });
-  
+
     // Delete butonları
-    document.querySelectorAll(".fa-solid.fa-trash.delete-button").forEach((deleteButton) => {
-      deleteButton.addEventListener("click", (event) => {
-        handleDeleteButtonClick(event);
+    document
+      .querySelectorAll(".fa-solid.fa-trash.delete-button")
+      .forEach((deleteButton) => {
+        deleteButton.addEventListener("click", (event) => {
+          handleDeleteButtonClick(event);
+        });
       });
-    });
   }
 
   // Notu silmek için
@@ -663,4 +664,11 @@ document.addEventListener("DOMContentLoaded", function () {
       event.target.classList.add("active");
     }
   }
+
+  //modal kapandığında resize gitsin
+  $(document).ready(function () {
+    $("#submit-button").on("click", function () {
+      $(".ql-container > :last-child").css("display", "none");
+    });
+  });
 });
