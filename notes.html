@@ -25,16 +25,20 @@
         <div class="row searchBar py-3">
           <div class="container">
             <div class="row">
-              <div class="col-9">
-                <i class="fa fa-search searchIcon"></i>
-                <input
-                  class="searchInput"
+              <div class="col-6 col-lg-9">
+                 
+                <div class="form-group has-search mb-0">
+                  <span class="fa fa-search form-control-feedback"></span>
+                  <input
+                  class="searchInput form-control"
                   type="search"
                   placeholder="Search"
                   id="searchInput"
                 />
+                </div>
               </div>
-              <div class="col-3 text-right">
+
+              <div class="col-6 col-lg-3 text-right">
                 <div class="dropdown">
                   <button
                     class="btn btn-user dropdown-toggle"
@@ -66,8 +70,9 @@
       </div>
       <div class="container my-2">
         <div class="row mt-4">
-          <div class="col-9">
-            <button
+          <div class="col-lg-9 col-12 order-1 order-lg-0">
+     
+              <button
               class="btn btn-ctg active"
               id="allCategory"
               data-category="all"
@@ -81,8 +86,9 @@
               Personal
             </button>
             <button class="btn btn-ctg" data-category="project">Project</button>
-          </div>
-          <div class="col-3 text-right">
+            </div>
+           
+          <div class="col-lg-3 col-12 text-left text-lg-right mb-2 mb-lg-0 order-0 order-lg-1">
             <button type="button" class="btn btn-add" id="addButton">
               <i class="fa-solid fa-plus"></i> Add New Note
             </button>

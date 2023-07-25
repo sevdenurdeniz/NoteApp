@@ -361,6 +361,7 @@ button:focus {
 	border: none;
 	height: 100%;
 	background: transparent;
+	position: relative;
 }
 
 .searchInput:focus-visible {
@@ -609,10 +610,26 @@ button:focus {
 	border-bottom: 0;
 	border-left: 0.3em solid transparent;
 }
+/* Bootstrap 4 text input with search icon */
 
+.has-search .form-control {
+    padding-left: 2.375rem;
+}
+
+.has-search .form-control-feedback {
+    position: absolute;
+    z-index: 2;
+    display: block;
+    width: 2.375rem;
+    height: 2.375rem;
+    line-height: 2.375rem;
+    text-align: center;
+    pointer-events: none;
+    color: #aaa;
+}
 .searchIcon {
 	position: absolute;
-	left: -4px;
+    left: 11%;
 	top: 33%;
 	color: #6c757d;
 }
